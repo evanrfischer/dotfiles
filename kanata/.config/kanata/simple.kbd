@@ -1,14 +1,23 @@
 (defcfg
+  ;; keyboard names to connect to
   macos-dev-names-include (
     "Apple Internal Keyboard / Trackpad"
-    "Evan’s Magic Keyboard"
+    "magic-keys"
     "Karabiner DriverKit VirtualHIDKeyboard 1.8"   
   )
+
   ;; Crucial for macOS gesture and fn-key timing
   process-unmapped-keys yes
   concurrent-tap-hold yes
+
+  
 )
 
+;; ;;
+;; ;;
+;; ;; source
+;; ;;
+;; ;;
 (defsrc
   f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   esc    
@@ -19,6 +28,9 @@
   fn lctl   lmet lalt           spc             ralt rmet
 )
 
+;; ;; qwerty 
+;; ;;
+;; ;;
 (deflayer qwerty
   ;; 1. The top row now maps directly to macOS media/system symbols
   🔅    🔆    mctl sls  dtn  dnd  ◀◀   ▶⏸   ▶▶   🔇    🔉    🔊
@@ -27,9 +39,12 @@
   tab    q    w    e    r    t    y    u    i    o    p    [    ]     \
   esc     a    s    d    f    g    h    j    k    l    ;    '       ret
   lsft     z    x    c    v    b    n    m    ,    .    /          rsft
-  @fn lctl   lmet lalt           spc             ralt rmet
+  @fn lctl   lmet lalt           @spc            ralt rmet
 )
 
+;; ;; function keys 
+;; ;;
+;; ;;
 (deflayer fn
   ;; 2. Holding the fn key restores access to the actual F1-F12 keys
   f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
@@ -41,11 +56,32 @@
   _  _      _    _              _               _    _
 )
 
-;; (Num and Layers definitions omitted for brevity, ensure they have the F-row placeholders)
+;; ;; navigation 
+;; ;;
+;; ;;
+(deflayer nav
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _
+  _     _    _    _    _    _    _    _    _    _    _    _    _   _
+  _      _    _    _    _    _    _    _    _    _    _    _    _     _
+  _       _    _    _    _    _    left down up   rght _    _       _
+  _        lrld _    _    _    _    _    _    _    _    _          _
+  _  _      _    _              _               _    _
+)
+
+(defalias
+  spc (tap-hold 200 200 spc (layer-toggle nav))
+)
+
+
+
+
+
+
 
 (defalias
   
-  ;; 3. The fn alias: 
+  ;; fn
   ;; Tap: Sends the Globe/Fn key to macOS (for Emoji picker/Language switch)
   ;; Hold: Sends the Fn modifier to the OS AND toggles the F1-F12 layer.
   ;; This allows shortcuts like fn+C (Control Center) to still work.
