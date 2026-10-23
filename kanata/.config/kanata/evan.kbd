@@ -1,0 +1,127 @@
+;; https://jtroo.github.io/config.html 
+;; https://github.com/jtroo/kanata
+
+(defcfg
+  macos-dev-names-include (
+   "Apple Internal Keyboard / Trackpad"
+   "magic-keys"
+   "Karabiner DriverKit VirtualHIDKeyboard 1.8.0"
+  )
+  macos-continue-if-no-devs-found yes 
+  process-unmapped-keys yes
+  concurrent-tap-hold   yes
+)
+
+;; Physical keyboard layout. Also defines the formatting of this config file for subsequent layer definitions.
+(defsrc
+  esc    f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12
+  grv    1     2     3     4     5     6     7     8     9     0     -     =     bspc
+  tab    q     w     e     r     t     y     u     i     o     p     [     ]
+
+  caps     a     s     d     f     g     h     j     k     l     ;     '     \     ret
+
+  lsft  z     x     c     v     b     n     m     ,     .     /     rsft
+  fn     lctl  lalt  lmet              spc               rmet  ralt  ◀    ▲ ▼    ▶  
+)
+
+;; Kanata default layer definition.
+;;   Home row mods: asdf jkl;
+;;   fn layer: LIVE RELOAD, traditional function keys
+(deflayer base
+  caps   🔅     🔆     mctl  sls   dtn   dnd   ◀◀    ▶⏸    ▶▶    🔇     🔉     🔊
+  _      _     _     _     _     _     _     _     _     _     _     _     _     _
+  _      _     _     _     _     _     _     _     _     _     _     _     _
+
+  esc      @a    @s    @d    @f    _     _     @j    @k    @l    @;    _     _     _
+
+  _     _     _     _     _     _     _     _     _     _     _     _
+  @fn    _     _     _                 @spc              _     _     _    _ _    _
+)
+
+(deflayer fn
+  _      f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12
+  _      _     _     _     _     _     _     _     _     _     _     _     _     del
+  _      _     _     _     lrld  _     _     _     _     _     _     _     _
+
+  _        _     _     _     _     _     _     _     _     _     _     _     _     _
+
+  _     _     _     _     _     _     _     _     _     _     _     _
+  _      _     _     _                 _                 _     _     _    _ _    _
+)
+
+
+(deflayer nav
+  _      _     _     _     _     _     _     _     _     _     _     _     _
+  _      _     _     _     _     _     _     _     _     _     _     _     _     del
+  _      _     _     _     _     _     _     _     _     _     _     _     _
+
+  _        _     _     _     _     _     lft   down  up    rght  _     _     _     _
+
+  _     _     _     _     _     _     _     _     _     _     _     _
+  _      _     _     _                 _                 _     _     _    _ _    _
+)
+;; Home Row Modifications:
+
+;; Simple definition of homerow keys as normal keys. Used to disable home row mods when typing quickly.
+(deflayermap nomods
+a a
+s s
+d d
+f f
+j j
+k k
+l l
+; ;
+)
+
+
+(defvirtualkeys
+  ;; Switch to base layer
+  to-base (layer-switch base)
+)
+
+
+(defvar
+  ;; Standard tap and hold timing. Consider specific timing for certain keys/finger speeds.
+  tap-time 200
+  hold-time 200
+  
+  ;; Used in home row modifications to avoid triggering hold action when typing quickly.
+  ;; i.e. asdf followed by a left-hand-key will not trigger hold action for asdf. 
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+  right-hand-keys (
+    y u i o p
+    h j k l ;
+    n m , . /
+  )
+)
+
+(defalias
+  fn (tap-hold $tap-time $hold-time fn (layer-toggle fn))
+  spc (tap-hold $tap-time $hold-time spc (layer-toggle nav))
+  tdmux (tap-dance 200 (a C-b))
+
+  ;; tapping a home row key will disable home row mods while typing quickly. Home row mods 
+  ;; reactivate after 20ms pause in typing.
+  tap (multi
+    (layer-switch nomods)
+    (on-idle 20 tap-vkey to-base)
+  )
+
+
+  ;; Home row mods.
+  ;; 'a' is sent if tapped or, to help with typing quickly, if a left-hand-key is pressed after 'a' is tapped.
+  ;; lmet is sent if a is held and used with a right-hand-key.
+  ;; 
+  a (tap-hold-release-keys $tap-time $hold-time (multi @tdmux @tap) lsft $left-hand-keys)
+  s (tap-hold-release-keys $tap-time $hold-time (multi s @tap) lctl $left-hand-keys)
+  d (tap-hold-release-keys $tap-time $hold-time (multi d @tap) lalt $left-hand-keys)
+  f (tap-hold-release-keys $tap-time $hold-time (multi f @tap) lmet $left-hand-keys)
+  j (tap-hold-release-keys $tap-time $hold-time (multi j @tap) rmet $right-hand-keys)
+  k (tap-hold-release-keys $tap-time $hold-time (multi k @tap) ralt $right-hand-keys)
+  l (tap-hold-release-keys $tap-time $hold-time (multi l @tap) rctl $right-hand-keys)
+  ; (tap-hold-release-keys $tap-time $hold-time (multi ; @tap) rsft $right-hand-keys))
